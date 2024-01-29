@@ -1,0 +1,7 @@
+postgres:
+  host: localhost
+  port: 5433
+  dbname: myfin
+  user: grum
+  password: password
+  schema: myfin
