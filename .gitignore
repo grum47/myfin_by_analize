@@ -1,1 +1,4 @@
 my_fin/
+data/
+logs/
+__pycache__/
