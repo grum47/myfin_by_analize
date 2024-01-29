@@ -1,5 +1,5 @@
 import scrapy
-from myfin.items import MyfinItem
+from zion17.items import MyfinItem
 from ..spiders import generate_date_list as gdl
 from tqdm import tqdm
 from datetime import date
