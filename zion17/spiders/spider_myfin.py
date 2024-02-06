@@ -11,7 +11,7 @@ class MyFinSpder(scrapy.Spider):
     dt_today = date.today().strftime("%Y-%m-%d")
     dt_list = gdl.check_date_to_db('2024-01-01', dt_today) 
 
-    name = 'myfin'
+    name = 'zion17'
     allowed_domain = ['myfin.by']
 
     start_urls = []

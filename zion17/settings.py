@@ -7,10 +7,10 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "myfin"
+BOT_NAME = "zion17"
 
-SPIDER_MODULES = ["myfin.spiders"]
-NEWSPIDER_MODULE = "myfin.spiders"
+SPIDER_MODULES = ["zion17.spiders"]
+NEWSPIDER_MODULE = "zion17.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -68,7 +68,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "myfin.pipelines.MyfinPipeline": 300,
+   "zion17.pipelines.MyfinPipeline": 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
