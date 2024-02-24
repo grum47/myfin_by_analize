@@ -1,17 +1,17 @@
 import scrapy
 from zion17.items import MyfinItem
-from ..spiders import generate_date_list as gdl
+from . import generate_date_list as gdl
 from tqdm import tqdm
 from datetime import date
 
 
 
-class MyFinSpder(scrapy.Spider):
+class MyFinBanksSpider(scrapy.Spider):
 
     dt_today = date.today().strftime("%Y-%m-%d")
-    dt_list = gdl.check_date_to_db('2024-01-01', dt_today) 
+    dt_list = gdl.check_date_to_db_banks('2024-01-01', dt_today) 
 
-    name = 'zion17'
+    name = 'banks'
     allowed_domain = ['myfin.by']
 
     start_urls = []
@@ -20,7 +20,7 @@ class MyFinSpder(scrapy.Spider):
         start_urls.append(
             f'https://myfin.by/currency/brest/{dt}'
         )
-    
+
     def parse(self, response):
         myfin_item = MyfinItem()
 
