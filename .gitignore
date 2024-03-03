@@ -8,3 +8,4 @@ other/
 *.joblib
 *.ipynb
 *.project
+conf/server/telegram/telegram.yaml
