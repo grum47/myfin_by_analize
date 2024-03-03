@@ -17,20 +17,30 @@
 import pandas as pd
 import numpy as np
 import psycopg2
-from sqlalchemy import create_engine, text
-from omegaconf import OmegaConf
-from datetime import datetime
-from tqdm import tqdm
+import logging
 
+from sqlalchemy import create_engine
+from sqlalchemy import text
 from transliterate import translit
+from omegaconf import OmegaConf
 
+
+# add write logging to file
+logging.basicConfig(
+    level=logging.INFO,
+    filename="../logs/logs_analytics.log",
+    filemode="a",
+    format="%(asctime)s: %(levelname)s: %(message)s"
+)
+
+# read configuration
 conf = OmegaConf.load('/home/tests/tests/vscode/myfin_by_analize/conf/server/db/postgres.yaml')
-
+# create db engine
 engine = create_engine(
     f"postgresql+psycopg2://{conf.postgres.user}:{conf.postgres.password}@{conf.postgres.host}:{conf.postgres.port}/{conf.postgres.dbname}"
     )
 
-# выбираем данные из сырой таблицы
+logging.info("Read raw data")
 query =    """
     select  
             date_page
@@ -42,9 +52,9 @@ query =    """
     """
 
 df = pd.read_sql(query, engine.connect(), parse_dates={'date_page':'%Y-%m-%d'})
-print('Row table read success')
+logging.info('Read raw data success')
 
-# чистим имена банков
+# clear bank names
 df = df.sort_values(['bank_name','date_page'])
 
 df['bank_name'] = df['bank_name'].apply(
@@ -54,9 +64,9 @@ df['bank_name'] = df['bank_name'].apply(
         reversed=True
         ).replace("'", '')
     )
+logging.info('Clear bank names success')
 
-
-# функции подсчета серий повышений и понижений цены
+# functions for calculating series of price up and down
 def count_up(df):
     cnt_up = 0
     result = []
@@ -85,7 +95,7 @@ def count_down(df):
     return df
 
 
-# функция подсчета статистик по датафреймам
+# the function of calculating statistics on dataframes
 def new_features(list_datarfames, list_periods):
     X = pd.DataFrame()
 
@@ -95,14 +105,12 @@ def new_features(list_datarfames, list_periods):
         num_col = 1
         for win in list_periods:  
             
-            X[f'diff_mean_{win}_{suffix}'] = dataframe['diff_day'].rolling(window=win-1).mean().fillna(0)
-
             mean_decay = lambda x: (x * np.power(0.9, np.arange(win)[::-1])).sum()
-            X[f'mean_decay_{win}_{suffix}'] = dataframe.iloc[:, num_col].rolling(window=win).apply(mean_decay, raw=True)
-
             diff_fl = lambda x: x[0] - x[-1]
-            X[f'diff_fl_{win}_{suffix}'] = dataframe.iloc[:, num_col].rolling(window=win).apply(diff_fl, raw=True)
 
+            X[f'diff_mean_{win}_{suffix}'] = dataframe['diff_day'].rolling(window=win-1).mean().fillna(0)
+            X[f'mean_decay_{win}_{suffix}'] = dataframe.iloc[:, num_col].rolling(window=win).apply(mean_decay, raw=True)
+            X[f'diff_fl_{win}_{suffix}'] = dataframe.iloc[:, num_col].rolling(window=win).apply(diff_fl, raw=True)
             X[f'mean_{win}_{suffix}'] = dataframe.iloc[:, num_col].rolling(window=win).mean().fillna(0)
             X[f'median_{win}_{suffix}'] = dataframe.iloc[:, num_col].rolling(window=win).median().fillna(0)
             X[f'min_{win}_{suffix}'] = dataframe.iloc[:, num_col].rolling(window=win).min().fillna(0)
@@ -112,21 +120,20 @@ def new_features(list_datarfames, list_periods):
     return X
 
 
-# очищаем витрину
+# cleaning the mart
 with engine.connect() as conn:
     conn.exec_driver_sql("DROP TABLE myfin.mart_for_model")
     conn.commit()
-print('Mart table mart_for_model drop success')
+logging.info('Mart table mart_for_model drop success')
 
-# формируем датафрейм по каждому банку 
-print('Start counting bank statistics')
-for bank_name in tqdm(df['bank_name'].drop_duplicates().values.tolist()):    
+logging.info('Start counting bank statistics')
+for bank_name in df['bank_name'].drop_duplicates().values.tolist():
     df_bank = df.loc[df['bank_name'] == bank_name].copy()
     df_bank.name = 'price_usd_sell'
 
     df_bank.set_index('date_page', inplace=True)
     
-    # считаем серии повышений и понижений цены
+    # we consider a series of price up and down
     df_bank['is_up'] = np.where(
         (df_bank['price_value_usd_sell'] - df_bank['price_value_usd_sell'].shift(1)) > 0,
         1, np.where(
@@ -138,7 +145,7 @@ for bank_name in tqdm(df['bank_name'].drop_duplicates().values.tolist()):
     df_bank = count_down(df_bank)
     df_bank.drop('is_up', axis=1, inplace=True)
 
-    # считаем статистики
+    # counting statistics by windows
     list_periods = [5, 7, 14, 21, 28, 35, 60, 100]
     df_new_features = new_features([df_bank,], list_periods)
     df_bank = pd.concat([df_bank, df_new_features], axis=1)
@@ -146,7 +153,8 @@ for bank_name in tqdm(df['bank_name'].drop_duplicates().values.tolist()):
     df_bank['y'] = df_bank['price_value_usd_sell'].shift(-1)
     df_bank['y_predict'] = None
 
-    # запись в базу
+    # writing to the database
     df_bank.to_sql(name='mart_for_model', con=engine, schema='myfin', if_exists='append')
-    
-print(f'Create mart for model success {datetime.now()}')
+
+
+logging.info('Create mart for model success')
