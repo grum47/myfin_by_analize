@@ -3,6 +3,7 @@ from omegaconf import OmegaConf
 import logging 
 import os
 from datetime import date
+import time
 from pathlib import Path
 
 
@@ -44,6 +45,7 @@ try:
     for fl in sorted(os.listdir(f'./report/{folder_name}')):
         path_img = os.path.dirname(os.path.abspath(__file__)) + f'/report/{folder_name}/{fl}'
         send_picture_tg(path_img)
+        time.sleep(0.3)
         logging.info(f'{path_img} send')
 
 except Exception as e:
