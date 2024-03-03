@@ -104,7 +104,6 @@ try:
         fig_dynamics.write_image(f'{file_name}')
 
     # calculating statistics for cards
-    sma_intersection = None
     sma_up = 14 if df['is_14_above_28'].values[-1] == 1 else 28
     sma_14_is_up = 1 if df['is_14_up'].values[-1] == 1 else -1
     sma_28_is_up = 1 if df['is_28_up'].values[-1] == 1 else -1
