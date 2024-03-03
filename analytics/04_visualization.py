@@ -152,7 +152,7 @@ try:
     cnt_day_up_14 = df['cnt_is_14_up'].values[-1]
     cnt_day_up_28 = df['cnt_is_28_up'].values[-1]
 
-    # cards
+    logging.info(" :::   Read last data")
     query =    """
             with bank as
             (
@@ -191,7 +191,7 @@ try:
     price_value_usd_sell_365_day = df.iloc[:, 7][0]
     cnt_up = df.iloc[:, 8][0]
     cnt_down = df.iloc[:, 9][0]
-    y_predict = df.iloc[:, 10][0]
+    y_predict = float(df.iloc[:, 10][0])
 
     # cards viz
     fig_cards = go.Figure()
