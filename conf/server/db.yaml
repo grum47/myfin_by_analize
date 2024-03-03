@@ -1,3 +1,5 @@
 defaults:
   - db:
     - postgres
+  - telegram:
+    -telegram
