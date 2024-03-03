@@ -32,6 +32,7 @@ def check_date_to_db_banks(from_dt, to_dt):
             (
                 select 	distinct date_page::date
                 from 	myfin.myfin_raw cp 
+                where 	myfin_bank_id != 999999
             )
             select 	gen_date::date::text as search_dt
             from	generate_series(%s, %s, interval '1 day') as gen_date
