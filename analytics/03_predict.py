@@ -6,7 +6,7 @@ from omegaconf import OmegaConf
 import logging
 
 from joblib import load
-
+from datetime import date
 
 # add write logging to file
 logging.basicConfig(
@@ -38,7 +38,8 @@ try:
     X_test = df.drop(['date_page', 'bank_name', 'y', 'y_predict'], axis=1).copy()
 
     logging.info(" :::   Load Model")
-    model = load('zion19.joblib')
+    folder_name = date.today().strftime('%Y-%m-%d')
+    model = load(f'./models/{folder_name}/zion17.joblib')
 
     predictions = round(model.predict(X_test)[0][0], 4)
     logging.info(f" :::   Predictions: {predictions}")
