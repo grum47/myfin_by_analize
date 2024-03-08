@@ -31,7 +31,7 @@ def check_date_to_db_banks(from_dt, to_dt):
             with SBQ as 
             (
                 select 	distinct date_page::date
-                from 	myfin.myfin_raw cp 
+                from 	myfin_raw.myfin_by cp 
                 where 	myfin_bank_id != 999999
             )
             select 	gen_date::date::text as search_dt
@@ -61,7 +61,7 @@ def check_date_to_db_nbrb(from_dt, to_dt):
             with SBQ as 
             (
                 select 	distinct date_page::date
-                from 	myfin.myfin_raw cp 
+                from 	myfin_raw.myfin_by cp 
                 where 	myfin_bank_id = 999999
             )
             select 	gen_date::date::text as search_dt

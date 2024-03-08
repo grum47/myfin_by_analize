@@ -26,26 +26,16 @@ class MyfinPipeline:
         self.cursor = self.connection.cursor()
 
         self.cursor.execute("""
-        CREATE TABLE IF NOT EXISTS myfin.myfin_raw(
-            department_id integer,
-            myfin_bank_id integer,
-            myfin_currencies_courses_bank_id integer,
-            price_value_usd_sell numeric,
-            price_value_usd_buy numeric,
-            price_value_eur_sell numeric,
-            price_value_eur_buy numeric,
-            price_value_rub_sell numeric,
-            price_value_rub_buy numeric,
-            date_page date,
-            price_value_usd_sell_tm timestamp,
-            price_value_usd_buy_tm timestamp,
-            price_value_eur_sell_tm timestamp,
-            price_value_eur_buy_tm timestamp,
-            price_value_rub_sell_tm timestamp,
-            price_value_rub_buy_tm timestamp,
-            bank_name varchar(50),
-            department_full_address varchar
-        )
+        CREATE TABLE IF NOT EXISTS myfin_raw.myfin_by (
+                    myfin_bank_id int4 NULL,
+                    price_value_usd_sell numeric NULL,
+                    price_value_usd_buy numeric NULL,
+                    price_value_eur_sell numeric NULL,
+                    price_value_eur_buy numeric NULL,
+                    price_value_rub_buy numeric NULL,
+                    date_page date NULL,
+                    bank_name varchar(50) NULL
+                );
         """)
         # self.connection.commit()
 
@@ -65,7 +55,7 @@ class MyfinPipeline:
         
         try:
             query = """
-                    insert into myfin.myfin_raw (
+                    insert into myfin_raw.myfin_by (
                     myfin_bank_id,
                     price_value_usd_sell,
                     price_value_usd_buy,

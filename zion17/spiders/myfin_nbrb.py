@@ -8,7 +8,7 @@ from datetime import date
 class MyFinNbrbSpider(scrapy.Spider):
 
     dt_today = date.today().strftime("%Y-%m-%d")
-    dt_list = gdl.check_date_to_db_nbrb('2016-01-01', dt_today) 
+    dt_list = gdl.check_date_to_db_nbrb('2024-01-01', dt_today) 
 
     name = 'nbrb'
     allowed_domain = ['myfin.by']
