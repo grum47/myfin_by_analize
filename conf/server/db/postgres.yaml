@@ -4,4 +4,3 @@ postgres:
   dbname: myfin
   user: grum
   password: password
-  schema: myfin
