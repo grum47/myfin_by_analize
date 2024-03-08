@@ -36,28 +36,8 @@ try:
 
     logging.info(" :::   Read dynamics data")
     bank = 'nbrb'
-    query = f"""
-            with bank as
-    (
-        select '{bank}' as bank_viz
-    )
-    select	date_page::date as date_page 
-            , bank_name 
-            , price_value_usd_sell 
-            , mean_14_price_usd_sell 
-            , mean_28_price_usd_sell 
-            , case when mean_14_price_usd_sell > mean_28_price_usd_sell then 1 else 0 end as is_14_above_28
-            , case when mean_28_price_usd_sell > mean_14_price_usd_sell then 1 else 0 end as is_28_above_14
-            , abs((mean_14_price_usd_sell - mean_28_price_usd_sell) / price_value_usd_sell * 100) as abs_distance_btw_14_28
-            , case when mean_14_price_usd_sell - lag(mean_14_price_usd_sell, 1) over() > 0 then 1 else 0 end as is_14_up
-            , case when mean_28_price_usd_sell - lag(mean_28_price_usd_sell, 1) over() > 0 then 1 else 0 end as is_28_up
-    from 	myfin.mart_for_model mfm 
-    where 	mfm.bank_name = (select bank_viz from bank)
-    and 	date_page >= current_date - '1 year'::interval
-    order by date_page
-        """
-
-    df = pd.read_sql(query, engine.connect(), parse_dates={'date_page':'%Y-%m-%d'})
+    with open('./sql/myfin_dm_read_for_viz_dynamics.sql', 'r') as query:
+        df = pd.read_sql_query(query.read(), engine.connect(), parse_dates={'date_page':'%Y-%m-%d'})
     engine.connect().close()
 
     df_yr_dynamics = df[['date_page', 'price_value_usd_sell', 'mean_14_price_usd_sell', 'mean_28_price_usd_sell']].set_index('date_page').copy()
@@ -153,33 +133,8 @@ try:
     cnt_day_up_28 = df['cnt_is_28_up'].values[-1]
 
     logging.info(" :::   Read last data")
-    query =    """
-            with bank as
-            (
-                select 'nbrb' as bank_viz
-            ), bank_stat as 
-            (
-                select	date_page 
-                        , bank_name 
-                        , price_value_usd_sell
-                        , lag(price_value_usd_sell, 1) over() as price_value_usd_sell_1_day
-                        , lag(price_value_usd_sell, 7) over() as price_value_usd_sell_7_day
-                        , lag(price_value_usd_sell, 30) over() as price_value_usd_sell_30_day
-                        , lag(price_value_usd_sell, 90) over() as price_value_usd_sell_90_day
-                        , lag(price_value_usd_sell, 365) over() as price_value_usd_sell_365_day
-                        , cnt_up 
-                        , cnt_down 
-                        , y_predict
-                from 	myfin.mart_for_model mfm
-                where 	mfm.bank_name = (select bank_viz from bank)
-                order by date_page desc 
-            )
-            select	*
-            from 	bank_stat
-            -- where 	date_page = current_date - '1 day'::interval
-        """
-
-    df = pd.read_sql(query, engine.connect(), parse_dates={'date_page':'%Y-%m-%d'}).iloc[0:1]
+    with open('./sql/myfin_dm_read_for_viz_cards.sql', 'r') as query:
+        df = pd.read_sql_query(query.read(), engine.connect(), parse_dates={'date_page':'%Y-%m-%d'}).iloc[0:1]
 
     date_yesterday = df.iloc[:, 0][0].strftime('%Y-%m-%d')
     bank_name = df.iloc[:, 1][0]

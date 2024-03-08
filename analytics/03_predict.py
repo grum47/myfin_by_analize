@@ -24,13 +24,8 @@ engine = create_engine(
 
 logging.info(" :::   Read raw data")
 try:
-    query =    """
-        select  *
-        from 	myfin.myfin.mart_for_model mr 
-        where   bank_name = 'nbrb'
-        and     y is null
-        """
-    df = pd.read_sql(query, engine.connect())
+    with open('./sql/myfin_dm_read_for_predict.sql', 'r') as query:
+        df = pd.read_sql_query(query.read(), engine.connect())
     engine.connect().close()
 
     df = df.loc[df['bank_name'] == 'nbrb'].reset_index(drop=True).copy()
@@ -45,7 +40,7 @@ try:
     logging.info(f" :::   Predictions: {predictions}")
 
     with engine.connect() as conn:
-        query = f"UPDATE myfin.mart_for_model SET y_predict = {predictions} where date_page = '{date_page}'"
+        query = f"UPDATE myfin_dm.myfin_by_for_model SET y_predict = {predictions} where date_page = '{date_page}'"
         logging.info(query)
         conn.exec_driver_sql(query)
         conn.commit()

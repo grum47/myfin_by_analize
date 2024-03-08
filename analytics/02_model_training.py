@@ -30,15 +30,8 @@ engine = create_engine(
     )
 
 logging.info(" :::   Read raw data")
-query =    """
-    select  *
-    from 	myfin.myfin.mart_for_model mr 
-    where   date_page >= '2022-01-01'
-    and     bank_name = 'nbrb'
-    and     y is not null
-    order by date_page
-    """
-df = pd.read_sql(query, engine.connect(), parse_dates={'date_page':'%Y-%m-%d'})
+with open('./sql/myfin_dm_read.sql', 'r') as query:
+    df = pd.read_sql_query(query.read(), engine.connect(), parse_dates={'date_page':'%Y-%m-%d'})
 engine.connect().close()
 
 logging.info(" :::   Create X_train, y_train")

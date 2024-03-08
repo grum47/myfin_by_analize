@@ -45,17 +45,9 @@ try:
         )
 
     logging.info(" :::   Read raw data")
-    query =    """
-        select  
-                date_page
-                , bank_name
-                , price_value_usd_sell
-                , price_value_usd_buy - price_value_usd_sell as bank_spred
-        from 	myfin.myfin.myfin_raw mr 
-        -- and date_page >= current_date - '1000 day'::interval
-        """
-
-    df = pd.read_sql(query, engine.connect(), parse_dates={'date_page':'%Y-%m-%d'})
+    with open('./sql/myfin_raw_data.sql', 'r') as query:
+        df = pd.read_sql_query(query.read(), engine.connect(), parse_dates={'date_page':'%Y-%m-%d'})
+    
     logging.info(' :::   Read raw data                  : success')
 
     # clear bank names
@@ -127,41 +119,41 @@ try:
 
     # cleaning the mart
     with engine.connect() as conn:
-        conn.exec_driver_sql("DROP TABLE IF EXISTS myfin.mart_for_model")
+        conn.exec_driver_sql("DROP TABLE IF EXISTS myfin_dm.myfin_by_for_model")
         conn.commit()
     logging.info(' :::   Mart table mart_for_model drop : success')
 
     logging.info(' :::   Start counting bank statistics')
     for bank_name in df['bank_name'].drop_duplicates().values.tolist():
-        logging.info(f' :::       Bank: {bank_name}')
-        df_bank = df.loc[df['bank_name'] == bank_name].copy()
-        df_bank.name = 'price_usd_sell'
+        if bank_name == 'nbrb':
+            logging.info(f' :::       Bank: {bank_name}')
+            df_bank = df.loc[df['bank_name'] == bank_name].copy()
+            df_bank.name = 'price_usd_sell'
 
-        df_bank.set_index('date_page', inplace=True)
-        
-        # we consider a series of price up and down
-        df_bank['is_up'] = np.where(
-            (df_bank['price_value_usd_sell'] - df_bank['price_value_usd_sell'].shift(1)) > 0,
-            1, np.where(
-                (df_bank['price_value_usd_sell'] - df_bank['price_value_usd_sell'].shift(1)) < 0,
-                -1, 0
+            df_bank.set_index('date_page', inplace=True)
+            
+            # we consider a series of price up and down
+            df_bank['is_up'] = np.where(
+                (df_bank['price_value_usd_sell'] - df_bank['price_value_usd_sell'].shift(1)) > 0,
+                1, np.where(
+                    (df_bank['price_value_usd_sell'] - df_bank['price_value_usd_sell'].shift(1)) < 0,
+                    -1, 0
+                    )
                 )
-            )
-        df_bank = count_up(df_bank)
-        df_bank = count_down(df_bank)
-        df_bank.drop('is_up', axis=1, inplace=True)
+            df_bank = count_up(df_bank)
+            df_bank = count_down(df_bank)
+            df_bank.drop('is_up', axis=1, inplace=True)
 
-        # counting statistics by windows
-        list_periods = [5, 7, 14, 21, 28, 35, 60, 100]
-        df_new_features = new_features([df_bank,], list_periods)
-        df_bank = pd.concat([df_bank, df_new_features], axis=1)
-        df_bank.dropna(inplace=True)
-        df_bank['y'] = df_bank['price_value_usd_sell'].shift(-1)
-        df_bank['y_predict'] = None
+            # counting statistics by windows
+            list_periods = [5, 7, 14, 21, 28, 35, 60, 100]
+            df_new_features = new_features([df_bank,], list_periods)
+            df_bank = pd.concat([df_bank, df_new_features], axis=1)
+            df_bank.dropna(inplace=True)
+            df_bank['y'] = df_bank['price_value_usd_sell'].shift(-1)
+            df_bank['y_predict'] = None
 
-        # writing to the database
-        df_bank.to_sql(name='mart_for_model', con=engine, schema='myfin', if_exists='append')
-
+            # writing to the database
+            df_bank.to_sql(name='myfin_by_for_model', con=engine, schema='myfin_dm', if_exists='append')
 
     logging.info(' :::   Create mart for model          : success')
 except Exception as e:
