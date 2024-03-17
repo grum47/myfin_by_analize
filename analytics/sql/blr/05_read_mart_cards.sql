@@ -14,7 +14,7 @@ with bank as
             , cnt_up 
             , cnt_down 
             , y_predict
-    from 	myfin_dm.myfin_by_for_model mfm
+    from 	myfin_dm.myfin_by mfm
     where 	mfm.bank_name = (select bank_viz from bank)
     order by date_page desc 
 )

@@ -9,7 +9,7 @@ from datetime import date
 class MyFinBanksSpider(scrapy.Spider):
 
     dt_today = date.today().strftime("%Y-%m-%d")
-    dt_list = gdl.check_date_to_db_banks('2024-01-01', dt_today) 
+    dt_list = gdl.check_date_to_db_banks('2019-01-01', dt_today) 
 
     name = 'banks'
     allowed_domain = ['myfin.by']
