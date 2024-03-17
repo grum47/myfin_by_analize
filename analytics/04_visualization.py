@@ -40,13 +40,13 @@ try:
         df = pd.read_sql_query(query.read(), engine.connect(), parse_dates={'date_page':'%Y-%m-%d'})
     engine.connect().close()
 
-    df_yr_dynamics = df[['date_page', 'price_value_usd_sell', 'mean_14_price_usd_sell', 'mean_28_price_usd_sell']].set_index('date_page').copy()
+    df_dynamics_show = df[['date_page', 'price_value_usd_sell', 'mean_14_price_usd_sell', 'mean_28_price_usd_sell']].set_index('date_page').copy()
 
     # we draw the price dynamics on different windows
     for days in [365, 180, 90, 60]:
-        end_dt = df_yr_dynamics.index.max()
+        end_dt = df_dynamics_show.index.max()
         start_dt = end_dt - timedelta(days=days)
-        df_dynamics_show = df_yr_dynamics[f"{start_dt}":f"{end_dt}"]
+        df_dynamics_show = df_dynamics_show[f"{start_dt}":f"{end_dt}"]
 
         fig_dynamics = px.line(
             df_dynamics_show,

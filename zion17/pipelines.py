@@ -33,11 +33,12 @@ class MyfinPipeline:
                     price_value_eur_sell numeric NULL,
                     price_value_eur_buy numeric NULL,
                     price_value_rub_buy numeric NULL,
+                    price_value_rub_sell numeric NULL,
                     date_page date NULL,
                     bank_name varchar(50) NULL
                 );
         """)
-        # self.connection.commit()
+        self.connection.commit()
 
 
 
@@ -81,7 +82,8 @@ class MyfinPipeline:
             
             self.connection.commit()
             self.connection.close()
-        except:
+        except Exception as e:
+            print(e)
             self.connection.close()
         
         return item
