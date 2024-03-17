@@ -1,4 +1,4 @@
-# myfin_by_analize
+# Zion17
 
 Personal telegram-bot project with currency rates analytics and tips.
 
