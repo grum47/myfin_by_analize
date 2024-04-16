@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:15
+    restart: always
+    ports:
+    - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: dbname
+    volumes:
+      - ./database_ddl/ddl.sql:/docker-entrypoint-initdb.d/ddl.sql
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - network-db
+      
+networks:
+  network-db:
+    driver: bridge

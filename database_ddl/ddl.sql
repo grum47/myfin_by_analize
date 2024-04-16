@@ -14,7 +14,7 @@ CREATE TABLE myfin_raw.myfin_by (
 	price_value_rub_sell numeric NULL,
 	price_value_rub_buy numeric NULL,
 	date_page date NULL,
-	bank_name varchar(50) NULL,
+	bank_name varchar(50) NULL
 );
 CREATE INDEX myfin_raw_bank_name_idx ON myfin_raw.myfin_by USING btree (bank_name);
 CREATE INDEX myfin_raw_date_page_idx ON myfin_raw.myfin_by USING btree (date_page);

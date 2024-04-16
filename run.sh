@@ -1,9 +1,9 @@
 #!/bin/bash
 
-source /home/tests/tests/vscode/Zion17/my_fin/bin/activate
+source VenvZion17/bin/activate
 
 echo "Start docker DB"
-docker start myfin
+docker-compose up -d
 
 # echo "Running crawler banks"
 # scrapy crawl banks
@@ -11,10 +11,10 @@ docker start myfin
 echo "Running crawler nbrb"
 scrapy crawl nbrb
 
-cd /home/tests/tests/vscode/Zion17/analytics
+cd analytics
 
 echo "Running main.py"
 python3 main.py
 
 echo "Stop docker DB"
-docker stop myfin
+docker-compose down
